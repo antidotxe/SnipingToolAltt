@@ -1,0 +1,6 @@
+PyQt6==6.6.1
+Pillow==10.1.0
+keyboard==0.13.5
+pytest==7.4.3
+pytest-qt==4.2.0
+hypothesis==6.88.0
