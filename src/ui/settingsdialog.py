@@ -1,7 +1,7 @@
 from PyQt6.QtWidgets import (
     QDialog, QVBoxLayout, QHBoxLayout, QLabel, 
     QPushButton, QLineEdit, QMessageBox, QGroupBox,
-    QFormLayout, QWidget
+    QFormLayout, QWidget, QCheckBox
 )
 from PyQt6.QtCore import Qt, pyqtSignal
 from PyQt6.QtGui import QKeySequence, QKeyEvent
@@ -87,6 +87,7 @@ class SettingsDialog(QDialog):
         self.keybind_edits: Dict[str, KeybindEdit] = {}
         self.original_keybinds: Dict[str, str] = {}
         self.orig_kb = {}
+        self.auto_save_cb = None
         
         self._setup_ui()
         self._load_current_settings()
@@ -100,6 +101,9 @@ class SettingsDialog(QDialog):
         
         kg = self._create_keybinds_group()
         l.addWidget(kg)
+        
+        cg = self._create_general_group()
+        l.addWidget(cg)
         
         bl = self._create_button_layout()
         l.addLayout(bl)
@@ -133,6 +137,16 @@ class SettingsDialog(QDialog):
         
         g.setLayout(fl)
         return g
+
+    def _create_general_group(self) -> QGroupBox:
+        g = QGroupBox("General Settings")
+        l = QVBoxLayout()
+        
+        self.auto_save_cb = QCheckBox("Auto Save to Clipboard")
+        l.addWidget(self.auto_save_cb)
+        
+        g.setLayout(l)
+        return g
     
     def _create_button_layout(self) -> QHBoxLayout:
         l = QHBoxLayout()
@@ -160,6 +174,9 @@ class SettingsDialog(QDialog):
             ed.setText(kb)
             self.original_keybinds[act] = kb
             self.orig_kb[act] = kb
+        
+        if self.auto_save_cb:
+            self.auto_save_cb.setChecked(self.config_manager.get_auto_save_clipboard())
     
     def _validate_keybind(self, action: str, keybind: str):
         iv, em = self.config_manager.validate_keybind(keybind, check_conflicts=False)
@@ -200,6 +217,9 @@ class SettingsDialog(QDialog):
                 dk = self.config_manager.DEFAULT_CONFIG["keybinds"].get(act, "")
                 ed.setText(dk)
                 ed.setStyleSheet("")
+            
+            if self.auto_save_cb:
+                self.auto_save_cb.setChecked(self.config_manager.DEFAULT_CONFIG["auto_save_clipboard"])
     
     def _save_settings(self):
         nk = {}
@@ -236,6 +256,9 @@ class SettingsDialog(QDialog):
         
         for act, kb in nk.items():
             self.config_manager.set_keybind(act, kb)
+        
+        if self.auto_save_cb:
+            self.config_manager.set_auto_save_clipboard(self.auto_save_cb.isChecked())
         
         self.config_manager.save_config()
         

@@ -14,6 +14,7 @@ class ConfigManager:
             "overlay_toggle": "ctrl+shift+s",
             "fullscreen_capture": "ctrl+shift+f",
         },
+        "auto_save_clipboard": True,
         "screenshot_directory": str(Path.home() / "Pictures" / "Screenshots"),
     }
 
@@ -67,6 +68,15 @@ class ConfigManager:
 
     def set_screenshot_directory(self, directory: str) -> None:
         self.config["screenshot_directory"] = directory
+
+    def get_auto_save_clipboard(self) -> bool:
+        return self.config.get(
+            "auto_save_clipboard",
+            self.DEFAULT_CONFIG["auto_save_clipboard"]
+        )
+
+    def set_auto_save_clipboard(self, enabled: bool) -> None:
+        self.config["auto_save_clipboard"] = enabled
 
     def validate_keybind(self, key_combo: str, check_conflicts: bool = False) -> Tuple[bool, Optional[str]]:
         if not key_combo or not key_combo.strip():

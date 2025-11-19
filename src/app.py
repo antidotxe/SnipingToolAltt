@@ -135,17 +135,17 @@ class ScreenshotApp(QObject):
         
         filepath = self.file_manager.save_screenshot(image)
         logger.info(f"Screenshot saved to: {filepath}")
+        print(f"✓ Screenshot saved to: {filepath}")
         
-        clipboard_success = self.clipboard_manager.copy_image_to_clipboard(image)
-        
-        if clipboard_success:
-            logger.info("Image copied to clipboard successfully")
-            print(f"✓ Screenshot saved to: {filepath}")
-            print("✓ Image copied to clipboard")
-        else:
-            logger.error("Failed to copy image to clipboard, but file was saved successfully")
-            print(f"✓ Screenshot saved to: {filepath}")
-            print("✗ Failed to copy to clipboard")
+        if self.config.get_auto_save_clipboard():
+            clipboard_success = self.clipboard_manager.copy_image_to_clipboard(image)
+            
+            if clipboard_success:
+                logger.info("Image copied to clipboard successfully")
+                print("✓ Image copied to clipboard")
+            else:
+                logger.error("Failed to copy image to clipboard, but file was saved successfully")
+                print("✗ Failed to copy to clipboard")
 
     def _handle_fullscreen_capture(self):
         if self._overlay_active:
@@ -155,17 +155,17 @@ class ScreenshotApp(QObject):
             
             filepath = self.file_manager.save_screenshot(image)
             logger.info(f"Full-screen screenshot saved to: {filepath}")
+            print(f"✓ Full-screen screenshot saved to: {filepath}")
             
-            clipboard_success = self.clipboard_manager.copy_image_to_clipboard(image)
-            
-            if clipboard_success:
-                logger.info("Image copied to clipboard successfully")
-                print(f"✓ Full-screen screenshot saved to: {filepath}")
-                print("✓ Image copied to clipboard")
-            else:
-                logger.error("Failed to copy image to clipboard, but file was saved successfully")
-                print(f"✓ Full-screen screenshot saved to: {filepath}")
-                print("✗ Failed to copy to clipboard")
+            if self.config.get_auto_save_clipboard():
+                clipboard_success = self.clipboard_manager.copy_image_to_clipboard(image)
+                
+                if clipboard_success:
+                    logger.info("Image copied to clipboard successfully")
+                    print("✓ Image copied to clipboard")
+                else:
+                    logger.error("Failed to copy image to clipboard, but file was saved successfully")
+                    print("✗ Failed to copy to clipboard")
 
     def start(self):
         self.file_manager.ensure_directory_exists()

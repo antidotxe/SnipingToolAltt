@@ -9,6 +9,7 @@ def main():
     signal.signal(signal.SIGINT, signal.SIG_DFL)
 
     app = QApplication(sys.argv)
+    app.setQuitOnLastWindowClosed(False)
     screenshot_app = ScreenshotApp()
     screenshot_app.start()
     sys.exit(app.exec())
