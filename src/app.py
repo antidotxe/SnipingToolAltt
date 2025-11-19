@@ -2,6 +2,7 @@ from PyQt6.QtWidgets import QApplication, QSystemTrayIcon, QMenu
 from PyQt6.QtCore import QObject
 from PyQt6.QtGui import QIcon, QPixmap, QPainter, QColor
 import sys
+import os
 import logging
 
 from src.ui.overlay import OverlayWindow
@@ -42,17 +43,20 @@ class ScreenshotApp(QObject):
         self.setup_keybinds()
 
     def _setup_system_tray(self):
-        pix = QPixmap(64, 64)
-        pix.fill(QColor(0, 0, 0, 0))
-        p = QPainter(pix)
-        p.setBrush(QColor(0, 120, 215))
-        p.drawRect(8, 8, 48, 48)
-        p.end()
-        
-        ico = QIcon(pix)
+        icon_path = os.path.join(os.path.dirname(__file__), "assets", "swip.png")
+        if os.path.exists(icon_path):
+            ico = QIcon(icon_path)
+        else:
+            pix = QPixmap(64, 64)
+            pix.fill(QColor(0, 0, 0, 0))
+            p = QPainter(pix)
+            p.setBrush(QColor(0, 120, 215))
+            p.drawRect(8, 8, 48, 48)
+            p.end()
+            ico = QIcon(pix)
         
         self.tray_icon = QSystemTrayIcon(ico)
-        self.tray_icon.setToolTip("Screenshot Overlay Tool")
+        self.tray_icon.setToolTip("Swip")
         
         menu = QMenu()
         
@@ -172,7 +176,7 @@ class ScreenshotApp(QObject):
         
         self.keybind_manager.start_listening()
         
-        print("Screenshot Overlay Tool started")
+        print("Swip started")
         print(f"Press {self.config.get_keybind('overlay_toggle')} to toggle overlay")
         print(f"Press {self.config.get_keybind('fullscreen_capture')} for full-screen capture (when overlay is active)")
 
@@ -182,7 +186,7 @@ class ScreenshotApp(QObject):
         if self._overlay_active:
             self.deactivate_overlay()
         
-        print("Screenshot Overlay Tool stopped")
+        print("Swip stopped")
     
     def show_settings(self):
         dialog = SettingsDialog(self.config)
