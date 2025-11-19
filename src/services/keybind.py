@@ -10,19 +10,31 @@ class KeybindManager(QObject):
     def __init__(self, config_manager=None):
         super().__init__()
         self._keybinds: Dict[str, Callable] = {}
+        self._signal_connections: Dict[str, Callable] = {}
         self._action_to_keybind: Dict[str, str] = {}
         self._listening = False
         self._config_manager = config_manager
         self.kb_list = []
 
     def register_keybind(self, key_combo: str, callback: Callable, action: Optional[str] = None) -> None:
+        if key_combo in self._keybinds:
+            self.unregister_keybind(key_combo)
+
         self._keybinds[key_combo] = callback
         self.kb_list.append(key_combo)
         
         if action:
             self._action_to_keybind[action] = key_combo
         
-        self.keybind_triggered.connect(lambda key: callback() if key == key_combo else None)
+        def wrapper(key):
+            if key == key_combo:
+                try:
+                    callback()
+                except Exception as e:
+                    print(f"Error in keybind callback for {key_combo}: {e}")
+
+        self.keybind_triggered.connect(wrapper)
+        self._signal_connections[key_combo] = wrapper
         
         if self._listening:
             keyboard.add_hotkey(key_combo, lambda kc=key_combo: self.keybind_triggered.emit(kc))
@@ -35,6 +47,13 @@ class KeybindManager(QObject):
                 except KeyError:
                     pass
             
+            if key_combo in self._signal_connections:
+                wrapper = self._signal_connections.pop(key_combo)
+                try:
+                    self.keybind_triggered.disconnect(wrapper)
+                except TypeError:
+                    pass
+
             del self._keybinds[key_combo]
             if key_combo in self.kb_list:
                 self.kb_list.remove(key_combo)
